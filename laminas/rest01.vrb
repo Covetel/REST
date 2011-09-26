@@ -1,0 +1,17 @@
+\frametitle {Respuestas HTTP, códigos de estado}La sintaxis de una respuesta HTTP es, en su formato más básico una línea de estado y tiene una sintaxis como la siguiente:
+
+    \begin{verbatim}
+versión  código-error  texto-explicativo
+    \end{verbatim}
+    Incluye la versión de protocolo, un código de éxito o error y el texto explicativo al código anterior. Un ejemplo bastante común es:
+    \begin{verbatim}
+HTTP/1.1 200 Ok
+    \end{verbatim}
+    Los posibles códigos de estado se identifican con números de tres cifras y se clasifican en cinco grupos:
+    \begin{itemize}
+\item Números del estilo \textbf{1XX} que representan mensajes de tipo informativo.
+\item Números del estilo \textbf{2XX} que indican que se completó satisfactoriamente la solicitud del cliente.
+\item Números del estilo \textbf{3XX} que indican que la solicitud fue redirigida.
+\item Números del estilo \textbf{4XX} que indican un error en la solicitud del cliente.
+\item Números del estilo \textbf{5XX} que indican un error en el lado del servidor.
+    \end{itemize}

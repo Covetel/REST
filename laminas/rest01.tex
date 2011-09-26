@@ -1,0 +1,304 @@
+\input{preambulo.tex}
+
+% Titulo
+\title[REST] {WebService REST con Catalyst}
+\author[Walter Vargas]{ info@covetel.com.ve \inst{1}}
+\subtitle{Fundamentos de HTTP 1.1}
+\institute[covetel.com.ve]{ \inst{1} Cooperativa Venezolana de Tecnologías Libres R.S. }
+\date
+
+\begin{document}
+
+\begin{frame} % (fold)
+    \titlepage 
+\end{frame}
+
+\begin{frame} % (fold)
+    \tableofcontents
+\end{frame}
+
+\section{Fundamentos de HTTP}
+
+\begin{frame}[allowframebreaks,fragile]{Hypertext Transfer Protocol} % (fold)
+    Hypertext Transfer Protocol o \textbf{HTTP} (en español protocolo de transferencia
+    de hipertexto) es el protocolo usado en cada transacción de la World Wide
+    Web. \\[0.2cm]
+
+    Fue desarrollado por la W3C y la IETF, esta colaboración culminó en 1999
+    con la publicación de una serie de RFC, el más importante de ellos es el
+    \textbf{RFC 2616}. \\[0.2cm]
+
+    El protocolo HTTP esta orientado a transacciones y sigue el esquema
+    petición-respuesta entre un cliente y un servidor. \\[0.2cm]
+
+    El cliente que efectua la petición se le conoce como \textit{User Agent} o
+    \textbf{Agente de Usuario} este puede ser un navegador web, un
+    \textit{spider} u otros. \\[0.2cm]
+
+    La información transmitida se llama \textbf{recurso}. \\[0.2cm]
+
+    La información se identifica mediante un \textit{Uniform Resource Locator}
+    (\textbf{URL}) o Localizador Uniforme de Recursos, cuyo formato general es: 
+    \begin{verbatim}
+esquema://maquina/directorio/recurso
+    \end{verbatim}
+
+    Los recursos transmitidos pueden ser archivos, cadenas de texto, una
+    consulta a una base de datos, o cualquier otro tipo de información. \\[0.2cm]
+
+    \textit{Stateless}, HTTP es un protocolo \textbf{sin estado}, esto quiere
+    decir, que no guarda ninguna información sobre conexiones anteriores.  \\[0.2cm]
+
+    Para mantener información del estado entre transacción y transacción se
+    utilizan las \textit{cookies},  que es información que un servidor puede
+    almacenar en el sistema cliente.
+\end{frame} 
+
+\subsection{Transacciones HTTP} % (fold)
+
+\begin{frame}{Transacciones HTTP} % (fold)
+    Una transacción HTTP está formada por un encabezado seguido, opcionalmente,
+    por una línea en blanco y algún dato. El encabezado especificará cosas como
+    la acción requerida del servidor, o el tipo de dato retornado, o el código
+    de estado. \\[0.5cm]
+
+    Un encabezado es un bloque de datos que precede a la información
+    propiamente dicha. \\[0.5cm]
+
+    El servidor puede excluir cualquier encabezado que ya esté procesado, como
+    Authorization, Content-type y Content-length. \\[0.5cm]
+\end{frame}
+
+\begin{frame}{Formato de mensajes} % (fold)
+    Cada transacción HTTP es una comunicación distinta. En cada una de ellas se
+    intercambian mensajes. Según la especificación del protocolo, un mensaje es
+    \textit{la unidad básica de la comunicación HTTP y consiste de una
+    secuencia estructurada de octetos ordenados con formato válido y
+    transmitidos por la conexión.}
+
+    Hay dos tipos de mensajes, petición o solicitud (Request) y respuesta
+    (Response), cada uno con su estructura, pero a groso modo el formato de un
+    mensaje genérico sería el siguiente: 
+
+\begin{itemize}
+	\item Línea de comienzo: tipo de petición o tipo de respuesta.
+	\item Cero o más líneas de encabezado acabadas en CRLF.
+	\item Separador, que no es más que otro CRLF.
+	\item Cuerpo del mensaje.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile, allowframebreaks]{Ejemplo de un diálogo HTTP} % (fold)
+
+\begin{itemize}
+    \item Prepare un servidor HTTP utilizando el módulo
+    \texttt{Net::Server::HTTP}
+    \footnotesize{
+    \begin{verbatim}
+$ perl -e 'use Net::Server::HTTP; Net::Server::HTTP->run(port=>3001)'
+    \end{verbatim}
+    }
+    \item Si no tiene instalado telnet, por favor instalelo. 
+    \item Utilizando telnet, conectese al puerto 3001 en \texttt{localhost}
+    para iniciar un diálogo HTTP. 
+    \begin{verbatim}
+$ telnet localhost 3001
+    \end{verbatim}
+    \item Al conectarse exitosamente debe ver el siguiente mensaje: 
+    \begin{verbatim}
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+    \end{verbatim}
+    \item Es hora de enviar nuestra petición. 
+\begin{verbatim}
+GET / HTTP/1.0 
+Host: localhost
+User-Agent: mi navegador 
+\end{verbatim}
+    \item El servidor responde de la siguiente manera: 
+\begin{verbatim}
+HTTP/1.0 200 OK
+Date: Mon Sep 26 18:09:39 2011 GMT
+Connection: close
+Server: Net::Server::HTTP/0.99
+Content-type: text/html
+
+\end{verbatim}
+    \item Una linea en blanco y luego los datos 
+\begin{verbatim}
+<form method=post action=/bam><input type=text name=foo><input type=submit></form>
+<pre>%ENV = (
+         'HTTP_HOST' => 'localhost',
+         'HTTP_USER_AGENT' => 'mi navegador',
+         'NET_SERVER_SOFTWARE' => 'Net::Server::HTTP/0.99',
+\end{verbatim}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Peticiones HTTP} % (fold)
+
+% subsection Peticiones HTTP (end)
+
+\begin{frame}[fragile]{Peticiones HTTP \textit{Request}} % (fold)
+
+    Una petición HTTP, en su formato más básico, tiene la siguiente sintaxis:
+    \begin{verbatim}
+método  URI  versión
+    \end{verbatim}
+
+    El método le indica al servidor que hacer con el URI , por último la
+    versión simplemente indica el número de versión del protocolo que el
+    cliente entiende. Una petición habitual utiliza el método GET para pedirle
+    al servidor que devuelva el URI solicitado:
+    
+    \begin{verbatim}
+GET /index.html HTTP/1.0
+    \end{verbatim}
+    
+\end{frame}
+
+\begin{frame}{Respuesta del Servidor} % (fold)
+    Generalmente el servidor envía al cliente la siguiente información: 
+
+    \begin{itemize}
+        \item Un código de estado que indica si la petición fue correcta o no. 
+        \item El recurso solicitado. 
+        \item Información sobre el recurso que se retorna. 
+    \end{itemize}
+\end{frame}
+
+\subsection{Versiones} % (fold)
+
+\begin{frame}{Versiones} % (fold)
+    \begin{description}
+        \item[0.9] Obsoleta, solo soportaba el método GET. 
+        \item[HTTP/1.0] (mayo de 1996) Esta es la primera revisión del
+        protocolo que especifica su versión en las comunicaciones. Aun se
+        utiliza, sobre todo en servidores proxy. 
+        \item[HTTP/1.1] (junio de 1999) Versión actual, las conexiones
+        persistentes están activadas por defecto (\textit{Keep-Alive}) y funcionan bien con los
+        proxies. 
+    \end{description}
+\end{frame}
+
+\subsection{Métodos HTTP} % (fold)
+
+% subsection Métodos HTTP (end)
+
+\begin{frame}[fragile, allowframebreaks]{Métodos HTTP} % (fold)
+    HTTP define 8 métodos (algunas veces referido como "verbos") que indica la acción que desea que se efectúe sobre el recurso identificado.
+
+    \begin{description}
+        \item[HEAD] 
+        Pide una respuesta idéntica a la que correspondería a una petición GET, pero sin el cuerpo de la respuesta. Esto es útil para la recuperación de meta-información escrita en los encabezados de respuesta, sin tener que transportar todo el contenido.
+        \item[GET]
+        Pide una representación del recurso especificado.
+        \begin{verbatim}
+$ telnet www.google.co.ve 80
+
+GET /images/srpr/logo3w.png HTTP/1.0
+
+        \end{verbatim}
+        \item[POST] Indica al servidor que se prepare para recibir información del cliente. Suele usarse para enviar información desde formularios.
+        \item[PUT] Sube, carga o realiza un upload de un recurso especificado (archivo), es el camino más eficiente para subir archivos a un servidor, esto es porque en POST utiliza un mensaje multiparte y el mensaje es decodificado por el servidor. En contraste, el método PUT te permite escribir un archivo en una conexión socket establecida con el servidor.
+        \item[DELETE] Borra el recurso especificado, solo si esta disponible el
+        método para el recurso.
+        \item[TRACE] Este método solicita al servidor que envíe de vuelta en un
+        mensaje de respuesta, en la sección del cuerpo de entidad, toda la data
+        que reciba del mensaje de solicitud. Se utiliza con fines de comprobación y diagnostico.
+        \item[OPTIONS] Devuelve los métodos HTTP que el servidor soporta para un URL especifico.Esto puede ser utilizado para comprobar la funcionalidad de un servidor web mediante petición en lugar de un recurso especifico
+        \item[CONNECT] Este método se reserva para uso con proxys. Permitirá que un proxy pueda dinámicamente convertirse en un túnel. Por ejemplo para comunicaciones con SSL.
+    \end{description}
+
+\end{frame}
+
+\begin{frame}{El método HEAD} % (fold)
+
+Es un método utilizado para preguntar información sobre un documento
+(metadatos), no para obtener el propio documento. HEAD es mucho más rápido que
+GET, ya que se transfiere mucha menos información. Es generalmente usada por
+clientes que usan caché para ver si el documento ha cambiado desde la última
+vez que accedieron a él. Si no cambió, la copia local puede usarse nuevamente;
+de otra forma, la versión actualizada debe recuperarse con GET.  \\[0.5cm]
+
+Este método puede ser usado para testear la validez, accesibilidad y reciente modificación de enlaces, sin tener que descargar los documentos en sí. 
+
+\end{frame}
+
+\begin{frame}{El método POST} % (fold)
+Es usado para transferir datos del cliente al servidor. Los datos del cuerpo de
+la solicitud se enviarán al URI especificado. Este URI será una referencia a un
+manipulador que procesará los datos de alguna forma, típicamente será un
+programa CGI. \\[0.5cm]
+
+Las respuestas al método POST no serán guardadas en caché salvo que en la propia respuesta se incluyan encabezados de control de caché adecuados.
+\end{frame}
+
+% subsection Versiones (end)
+
+\subsection{Probar los métodos} % (fold)
+
+\begin{frame}[fragile]{Probar los métodos} % (fold)
+    La manera más didáctica para observar la estructura de las peticiones y el
+    uso de los métodos, es con \textit{CouchDB}\\[0.5cm]
+
+    Por favor instale \textit{couchdb}, en el sistema operativo Debian
+    GNU/Linux se hace de la siguiente manera: 
+
+    \begin{verbatim}
+# aptitude install couchdb
+    \end{verbatim}
+
+    Vamos a utilizar \textit{Firefox} con la extensión de \textit{Firebug}
+    instalada y accedemos a la dirección
+    \url{http://localhost:5984/\_utils/}
+
+\end{frame}
+
+
+% subsection Probar los métodos (end)
+
+% subsection Transacciones HTTP (end)
+
+\subsection{Respuestas HTTP, códigos de estado} % (fold)
+
+\begin{frame}[fragile]{Respuestas HTTP,  códigos de estado} % (fold)
+    La sintaxis de una respuesta HTTP es, en su formato más básico una línea de estado y tiene una sintaxis como la siguiente:
+
+    \begin{verbatim}
+versión  código-error  texto-explicativo        
+    \end{verbatim}
+    Incluye la versión de protocolo, un código de éxito o error y el texto explicativo al código anterior. Un ejemplo bastante común es:
+    \begin{verbatim}
+HTTP/1.1 200 Ok
+    \end{verbatim}
+    Los posibles códigos de estado se identifican con números de tres cifras y se clasifican en cinco grupos:
+    \begin{itemize}
+		\item Números del estilo \textbf{1XX} que representan mensajes de tipo informativo.
+		\item Números del estilo \textbf{2XX} que indican que se completó satisfactoriamente la solicitud del cliente.
+		\item Números del estilo \textbf{3XX} que indican que la solicitud fue redirigida.
+		\item Números del estilo \textbf{4XX} que indican un error en la solicitud del cliente.
+		\item Números del estilo \textbf{5XX} que indican un error en el lado del servidor.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Códigos típicos de estado HTTP} % (fold)
+
+\begin{description}
+   
+\item[200 OK]	La solicitud del cliente fue satisfactoria y el servidor ha devuelto la información solicitada.
+\item[204 No Content]	El cuerpo de la respuesta no tiene contenido. Esto puede indicar, por ejemplo, un problema con un CGI que no devuelve datos.
+\item[301 Moved Permanently]	El URI solicitado no está disponible en el servidor. Ha sido movido a otra ubicación. Las solicitudes futuras deberán hacerse a esa ubicación.
+\item[400 Bad Request]	Hay un error de sintaxis en la solicitud del cliente. Por ejemplo mandar una solicitud indicando que el cliente soporta HTTP/1.1 y no enviar el encabezado de Host.
+\item[404 Not Found]	Este es junto con el 200 OK, el código más habitual. Indica que el documento solicitado no está disponible, probablemente el URI haya sido mal escrito.
+\item[500 Internal Server Error]	Este mensaje indica que algo ha ido mal en el servidor, casi siempre tiene que ver con problemas en programas CGI.
+
+\end{description}
+
+\end{frame}
+
+% subsection Respuestas HTTP, códigos de estado (end)
+
+\end{document}

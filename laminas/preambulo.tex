@@ -1,0 +1,66 @@
+% Copyleft 2010 by Walter Vargas <walter@covetel.com.ve>
+
+\documentclass[9pt]{beamer}
+\usepackage{listings}
+\lstset{
+    language=HTML 
+}
+\lstset{
+    basicstyle=\scriptsize, 
+    stringstyle=\ttfamily,
+    showstringspaces=false, 
+    numbers=left,
+    numberstyle=\scriptsize,
+    tabsize=2,
+}
+
+% Configuración de la apariencia. 
+
+\usetheme{Szeged}
+\usecolortheme{beaver}
+\usefonttheme[onlylarge]{structurebold}
+\setbeamerfont*{frametitle}{size=\normalsize,series=\bfseries}
+
+\usepackage{color}
+\definecolor{lightgray}{rgb}{.9, .9, .9}
+\definecolor{darkgray}{rgb}{.4, .4, .4}
+\definecolor{purple}{rgb}{0.65,  0.12,  0.82}
+\definecolor{azulito}{HTML}{0066CC}
+
+\lstdefinelanguage{HTML}{
+keywords={xml, DOCTYPE, head,  body, html}, 
+keywordstyle=\color{azulito}\bfseries, 
+ndkeywords={title, option, form, textarea, table, th, tr, td, p, br, input,
+button, frame, iframe, div, optgroup, select, fieldset,  legend, h1, h2, h3,
+h4, h5, h6, p, blockquote, address, em,strong, abbr, acronym, cite, dfn, code,
+kbd, samp, var, q, ul, li, dl, dt, dd}, 
+ndkeywordstyle=\color{blue}\bfseries, 
+identifierstyle=\color{black}, 
+sensitive=false, 
+comment=[l]{//}, 
+morecomment=[s]{/*}{*/}, 
+stringstyle=\color{azulito}\ttfamily, 
+morestring=[b]', 
+morestring=[b]"
+}
+
+\lstset{
+language=HTML, 
+backgroundcolor=\color{lightgray}, 
+extendedchars=true, 
+basicstyle=\scriptsize\ttfamily, 
+showstringspaces=false, 
+showspaces=false, 
+numbers=left, 
+numbersstyle=\footnotesize, 
+numbersep=9pt, 
+tabsize=2, 
+breaklines=true, 
+showtabs=false, 
+captionpos=b 
+}
+
+
+% Paquetes
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
