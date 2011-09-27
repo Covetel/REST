@@ -1,0 +1,355 @@
+\input{preambulo.tex}
+
+% Titulo
+\title[REST] {WebService REST con Catalyst}
+\author[Walter Vargas]{ info@covetel.com.ve \inst{1}}
+\subtitle{Catalyst::Controller::REST}
+\institute[covetel.com.ve]{ \inst{1} Cooperativa Venezolana de Tecnologías Libres R.S. }
+\date
+
+\begin{document}
+
+\section{Catalyst::Controller::REST}
+
+\begin{frame}{Catalyst::Controller::REST} % (fold)
+    Catalyst::Controller::REST implementa un mecanismo para crear servicios
+    RESTful en Catalyst. Extiende el mecanismo convencional de despacho de Catalyst
+    para soportar una serie de subrutinas que son invocadas en base al verbo
+    HTTP de la solicitud. \\[0.5cm]
+
+    \textit{Catalyst::Controller::REST} maneja de manera transparente todo el proceso de
+    serialización y deserialización por nosotros. 
+\end{frame}
+
+\subsection{Synopsis} % (fold)
+
+
+\begin{frame}[fragile]{Synopsis} % (fold)
+\begin{lstlisting}
+package TestServer::Controller::REST;
+use Moose;
+use namespace::autoclean;
+
+BEGIN {extends 'Catalyst::Controller::REST'; }
+
+sub prueba : Local : ActionClass('REST') {}
+
+sub prueba_GET {
+    my ($self, $c) = @_;
+    # Retornar 200 OK, con los datos en entity serializados en el body
+    $self->status_ok(
+        $c,
+        entity => {
+            nombre   => 'elnombre',
+            apellido => 'elapellido',
+        }
+    );
+}    
+\end{lstlisting}
+\end{frame}
+
+% subsection Synopsis (end)
+
+\subsection{Pasos para crear una controladora REST} % (fold)
+
+
+\begin{frame}[fragile, allowframebreaks]{Una controladora REST en pocos pasos} % (fold)
+
+    \begin{enumerate}
+        \item Crear una controladora de ejemplo \texttt{REST}
+        \begin{verbatim}
+$ script/testserver_create.pl controller REST
+        \end{verbatim}
+        \item Editamos el archivo \texttt{lib/TestServer/Controller/REST.pm}
+        \item La controladora debe extender de
+        \textit{Catalyst::Controller::REST} 
+        \begin{lstlisting}
+BEGIN {extends 'Catalyst::Controller::REST'; }
+        \end{lstlisting}
+        \item Creamos una acción base utilizando la clase de acción
+        \texttt{REST}
+        \begin{lstlisting}
+sub prueba : Local : ActionClass('REST') {}
+        \end{lstlisting}
+
+        \item Ahora debemos crear una subrutina por cada verbo HTTP que
+        quisieramos utilizar. 
+        \begin{lstlisting}
+sub prueba_GET {
+    my ($self, $c) = @_;
+    # Retornar 200 OK, con los datos en entity serializados en el body
+    $self->status_ok(
+        $c,
+        entity => {
+            nombre   => 'elnombre',
+            apellido => 'elapellido',
+        }
+    );
+}
+        \end{lstlisting}
+
+        \item Iniciamos el servidor de desarrollo de \textit{Catalyst}. 
+        \begin{verbatim}
+$ script/testserver_server.pl -r
+        \end{verbatim}
+
+        \footnotesize{
+        \item Probamos el verbo GET con \texttt{curl}
+        \begin{verbatim}
+$ curl -X GET -i -H "Content-Type: text/html" localhost:3000/rest/prueba
+        \end{verbatim}
+        }
+    \end{enumerate}
+
+    \textbf{Resumen:} Todas las peticiones GET hacia la ruta
+    \texttt{/rest/prueba} se procesan con la subrutina \texttt{prueba\_GET} y
+    así sucesivamente para cada uno de los verbos HTTP.
+\end{frame}
+
+\begin{frame}[fragile]{Métodos no implementados} % (fold)
+    Cualquier petición que utilice un método HTTP no implementado sera
+    respondida con el mensaje \textit{405 Method Not Allowed} y en la cabecera se
+    especificarán los métodos soportados. \\[0.2cm]
+
+    \textbf{Ejemplo:} 
+   \footnotesize{
+    \begin{verbatim}
+$ curl -X PUT -i -H "Content-Type: text/html" localhost:3000/rest/prueba 
+
+HTTP/1.0 405 Method Not Allowed
+Connection: close
+Date: Tue, 27 Sep 2011 16:00:41 GMT
+Allow: GET
+Allow: POST
+Content-Length: 64
+Content-Type: text/plain
+Status: 405
+X-Catalyst: 5.80032
+
+Method PUT not implemented for http://localhost:3000/rest/prueba
+    \end{verbatim}
+    }
+
+\end{frame}
+
+\begin{frame}{\texttt{OPTIONS}} % (fold)
+    Si no se especifica un \texttt{handler}, la controladora va a responder a
+    cualquier petición \texttt{OPTIONS} con un mensaje \texttt{200 OK},
+    agregando los verbos permitidos en la cabecera de la respuesta de manera
+    automática.
+\end{frame}
+
+% subsection Pasos para crear una controladora REST (end)
+
+\subsection{Serialización} % (fold)
+
+\begin{frame}[fragile]{Serialización} % (fold)
+    \texttt{Catalyst::Controller::REST} va automáticamente a serializar
+    nuestras respuestas, y a deserializar cualquier petición \texttt{POST},
+    \texttt{PUT}, \texttt{OPTIONS}. Evalua cual serializador debe utilizar, mapeando
+    el tipo de contenido (\texttt{content-type}) a un módulo de serialización.\\[0.5cm]
+
+    El tipo de contenido (\texttt{content-type}) se selecciona en base a: 
+
+\footnotesize{
+
+    \begin{itemize}
+        \item \textbf{Content-Type Header}, si la petición viene con un
+        atributo \texttt{Content-Type} definido,  se utilizara este valor. 
+\begin{verbatim}
+$ curl -X GET -i -H "Content-Type: application/json" localhost:3000/rest/prueba
+\end{verbatim}
+
+        \item \textbf{content-type query parameter},  Si la petición es GET,
+        puedes suministrar el parámetro content-type junto con la lista de
+        parámetros.
+\begin{verbatim}
+$ curl -X GET -i  localhost:3000/rest/prueba -d "content-type=text/xml"
+\end{verbatim}
+
+        \item \textbf{Accept Header}, finalmente si el cliente provee un
+        \textit{Accept Header}, se evalua y se utiliza la mejor opción
+        disponible para serializar. 
+\begin{verbatim}
+$ curl -X GET -i -H "Accept: application/json" localhost:3000/rest/prueba
+\end{verbatim}
+    \end{itemize}
+
+    }
+\end{frame}
+
+\subsubsection{Serializadores Disponibles} 
+
+\begin{frame}[fragile, allowframebreaks]{Serializadores Disponibles} % (fold)
+
+Un mecanismo de serialización dado sólo esta disponible si tiene instalado los
+módulos subyacentes. Por ejemplo, no puedes utilizar \texttt{XML::Simple} si el
+módulo no está disponible. \\[0.2cm]
+
+Adicionalmente, cada serializador tiene sus peculiaridades en cuanto a que
+estructuras de datos serán manejadas correctamente.\\
+
+En la siguiente lista podrá ver los mecanismos de serialización más comunes
+disponibles.
+
+\begin{itemize}
+    \item \texttt{text/x-yaml} \verb|=>| \texttt{YAML::Syck} \\
+    Devuelve un YAML generado por el módulo \href{http://search.cpan.org/perldoc?YAML%3A%3ASyck}{YAML::Syck}
+
+    \item  \texttt{text/html} \verb|=>| \texttt{YAML::HTML} \\
+    Utiliza los módulos
+    \href{http://search.cpan.org/perldoc?YAML%3A%3ASyck}{YAML::Syck} y
+    \href{http://search.cpan.org/perldoc?URI%3A%3AFind}{URI::Find} para generar
+    YAML con todas las URLs en forma de \texttt{hyperlinks}.
+
+
+    \item \texttt{application/json} \verb|=>| \texttt{JSON} \\
+    Utiliza el módulo \href{http://search.cpan.org/perldoc?JSON}{JSON} para
+    generar la salida en formato JSON. Se recomienda fuertemente tener el
+    módulo \texttt{JSON::XS} instalado. El tipo de contenido
+    \texttt{text/x-json} es soportado pero esta \textit{deprecated} y al
+    utilizarlo va a recibir mensajes de advertencia en los logs.
+
+    \item \texttt{x-data-dumper} \verb|=>|  \texttt{Data::Serializer}\\
+    Utiliza el módulo \texttt{Data::Serializer} para generar una salida en el
+    formato \texttt{Data::Dumper}
+
+    \item \texttt{application/x-storable} \verb|=>| \texttt{Data::Serializer}\\
+    Utiliza el módulo \texttt{Data::Serializer} para generar una salida en el
+    formato \href{http://search.cpan.org/perldoc?Storable}{Storable} de Perl.
+
+    \item \texttt{text/x-php-serialization} \verb|=>| \texttt{Data::Serializer}\\
+    Utiliza el módulo \texttt{Data::Serializer} para generar una salida en el
+    formato \texttt{PHP::Serialization}
+
+    \item \texttt{text/xml} \verb|=>| \texttt{XML::Simple} \\
+
+    Utiliza \texttt{XML::Simple} para generar la salida en formato XML. Este
+    método no es recomendado para trabajo pesado con XML. 
+
+
+\end{itemize}
+
+\end{frame}
+% subsection Serialización (end)
+
+\subsection{Status Helpers} % (fold)
+
+\begin{frame}{Status Helpers} % (fold)
+    Dado que gran parte de REST es HTTP, fueron creados los \textit{helpers} de
+    estado. Utilizar estos \textit{helpers} garantiza que la respuesta esta
+    correctamente formada conforme a los códigos, cabeceras y entidades HTTP
+    1.1. \\[0.5cm]
+
+    Estos \textit{helpers} cumplen con la especificación HTTP 1.1. Están
+    implementados como subrutinas convencionales, por lo cual es necesario
+    pasar como primer argumento la variable contexto de Catalyst (\texttt{\$c}).
+
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_ok}} % (fold)
+    Devuelve como respuesta la cadena \textit{200 OK}. Toma una entidad
+    (\texttt{entity}) y la serializa.\\[0.5cm]
+
+    \textbf{Ejemplo}
+    \begin{lstlisting}
+$self->status_ok( $c, entity => { radiohead => "Is a good band!" } );
+    \end{lstlisting}
+    
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_created}} % (fold)
+    Devuelve como respuesta la cadena \textit{201 CREATED}. Toma una entidad
+    (\texttt{entity}) y la serializa, adicionalmente se debe definir un
+    atributo \texttt{location} que contiene la ruta para alcanzar al recurso
+    reicentemente creado. \\[0.5cm]
+
+    \textbf{Ejemplo}
+    \begin{lstlisting}
+$self->status_created(
+   $c,
+   location => $c->req->uri->as_string,
+   entity => {
+       radiohead => "Is a good band!",
+   }
+ );
+    \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_no\_content}} % (fold)
+    Devuelve como respuesta la cadena \textit{204 NO CONTENT}. Se utiliza en
+    los casos en que la petición fue correctamente procesada, pero no hace
+    falta devolver información al agente de usuario. \\[0.5cm]
+
+    Una respuesta 204 no debe incluir cuerpo de mensaje, y siempre termina con
+    la primera línea vacía despues de la cabecera.
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_multiple\_choices}} % (fold)
+    Devuelve como respuesta la cadena \textit{300 MULTIPLE CHOICES}. Toma una
+    entidad (\texttt{entity}) para serializarla, la cual debería proporcionar
+    una lista de posibles rutas para alcanzar los recursos. También puede
+    contener un parámetro opcional \texttt{location} para definir una ruta de
+    preferencia. \\[0.5cm]
+
+    Se utiliza en los casos en que el recurso solicitado se corresponde con
+    algundo de entre una lista de recursos alternativos. Ha de ser el propio
+    agente de usuario (navegador, normalmente) quien elija entre los diferentes
+    recursos.  
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_bad\_request}} % (fold)
+    Devuelve como respuesta la cadena \textit{400 BAD REQUEST}. Recibe como
+    argumento un hash \texttt{messaje} que será convertida en el valor de \texttt{error} en
+    la respuesta serializada. \\[0.5cm]
+
+    \textbf{Ejemplo:}
+    \begin{lstlisting}
+$self->status_bad_request(
+    $c,
+    message => "No puedo darle lo que me pide",
+  );
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_not\_found}} % (fold)
+    Devuelve como respuesta la cadena \textit{404 NOT FOUND}. Toma un hash
+    \texttt{messaje} que será convertido en el valor de  \texttt{error} en la
+    respuesta serializada. \\[0.5cm]
+
+    \textbf{Ejemplo:} 
+
+    \begin{lstlisting}
+$self->status_not_found(
+    $c,
+    message => "No puede encontrar lo que estas buscando",
+  );
+
+    \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{status\_gone}} % (fold)
+    Devuelve una cadena \texttt{410 GONE} como respuesta. Toma un hash
+    \texttt{messaje} que será convertido en el valor de \texttt{error} en la
+    respuesta serializada. \\[0.5cm]
+
+    \texttt{41O GONE}: El recurso ya no está disponible, y no se espera que lo
+    vuelva a estar en el futuro. \\[0.5cm]
+
+    \textbf{Ejemplo: }
+
+    \begin{lstlisting}
+$self->status_gone(
+    $c,
+    message => "El documento fue eliminado.",
+  );        
+    \end{lstlisting}
+\end{frame}
+
+% subsection Status Helpers (end)
+
+
+
+\end{document}
