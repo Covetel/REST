@@ -1,0 +1,90 @@
+\input{preambulo.tex}
+
+% Titulo
+\title[REST] {WebService REST con Catalyst}
+\author[Walter Vargas]{ info@covetel.com.ve \inst{1}}
+\subtitle{Fundamentos de REST}
+\institute[covetel.com.ve]{ \inst{1} Cooperativa Venezolana de Tecnologías Libres R.S. }
+\date
+
+\begin{document}
+
+\section{Fundamentos de REST}
+
+\begin{frame}{¿Qué es un Servicio Web?} % (fold)
+El consorcio W3C define los Servicios Web  como sistemas software diseñados para 
+soportar una interacción interoperable maquina a maquina sobre una red. Los Servicios 
+Web suelen ser APIs Web que pueden ser accedidas dentro de una red (principalmente 
+Internet) y son ejecutados en el sistema que los aloja.   
+
+\end{frame}
+
+\begin{frame}{Que es REST} % (fold)
+REST (Representational State Transfer) es un estilo de arquitectura de software para 
+sistemas hipermedias distribuidos tales como la Web. El término fue introducido en la 
+tesis doctoral de Roy Fielding en 2000, quien es uno de los principales autores de la 
+especificación de HTTP. 
+\end{frame}
+
+\begin{frame}{Los 4 principios de REST} % (fold)
+\begin{itemize}
+	 \item utiliza los métodos HTTP de manera explícita
+	 \item no mantiene estado
+	 \item expone URIs con forma de directorios
+	 \item transfiere XML, JavaScript Object Notation (JSON), o ambos
+\end{itemize}
+\end{frame}
+
+\begin{frame}{REST utiliza los verbos HTTP de manera explícita} % (fold)
+    REST hace que los desarrolladores usen los métodos HTTP explícitamente de
+    manera que resulte consistente con la definición del protocolo. Este
+    principio de diseño básico establece una asociación uno-a-uno entre las
+    operaciones de crear, leer, actualizar y borrar y los métodos HTTP. De
+    acuerdo a esta asociación:
+
+\begin{itemize}
+	 \item se usa POST para crear un recurso en el servidor
+	 \item se usa GET para obtener un recurso
+	 \item se usa PUT para cambiar el estado de un recurso o actualizarlo
+	 \item se usa DELETE para eleminar un recurso
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{REST no mantiene estado} % (fold)
+Los servicios web REST necesitan escalar para poder satisfacer una demanda en
+constante crecimiento. Se usan clusters de servidores con balanceadores de
+carga y alta disponibilidad, proxies, y gateways de manera de conformar una
+topología serviciable, que permita transferir peticiones de un equipo a otro
+para disminuir el tiempo total de respuesta de una invocación al servicio web.
+El uso de servidores intermedios para mejorar la escalabilidad hace necesario
+que los clientes de servicios web REST envien peticiones completas e
+independientes; es decir, se deben enviar peticiones que inlcuyan todos los
+datos necesarios para cumplir el pedido, de manera que los componentes en los
+servidores intermedios puedan redireccionar y gestionar la carga sin mantener
+el estado localmente entre las peticiones.
+
+\end{frame}
+
+\begin{frame}{Guias Generales para crear URLS REST} % (fold)
+\begin{itemize}
+    
+	 \item Ocultar la tecnología usada en el servidor que aparecería como extensión de archivos (.jsp, .php, .asp), de manera de poder portar la solución a otra tecnología sin cambiar las URI.
+	 \item Mantener todo en minúsculas.
+	 \item Sustituir los espacios con guiones o guiones bajos (uno u otro).
+	 \item Evitar el uso de strings de consulta.
+	 \item en vez de usar un 404 Not Found si la petición es una URI parcial, devolver una página o un recurso predeterminado como respuesta.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{REST transfiere XML, JSON, o ambos} % (fold)
+La representación de un recurso en general refleja el estado actual del mismo y sus atributos al momento en que el cliente de la aplicación realiza la petición. La representación del recurso son simples "fotos" en el tiempo. Esto podría ser una representación de un registro de la base de datos que consiste en la asociación entre columnas y tags XML, donde los valores de los elementos en el XML contienen los valores de las filas. O, si el sistema tiene un modelo de datos, la representación de un recurso es una fotografía de los atributos de una de las cosas en el modelo de datos del sistema. Estas son las cosas que serviciamos con servicios web REST.
+\end{frame}
+
+\begin{frame}{RESTful y RESTafaris} % (fold)
+    A las aplicaciones que siguen los principios de REST se les llama
+    \textit{RESTful} y los desarrolladores que defienden REST se les dice
+    \textit{RESTafaris}
+\end{frame}
+
+\end{document}
